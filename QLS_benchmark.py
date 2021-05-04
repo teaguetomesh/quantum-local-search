@@ -48,6 +48,10 @@ def main():
     if not os.path.isdir(savepath):
         os.mkdir(savepath)
 
+    savepath += 'NPM_{}/'.format(args.npm)
+    if not os.path.isdir(savepath):
+        os.mkdir(savepath)
+
     for graphfn in all_graphs:
         graphname = graphfn.split('/')[-1].strip('.txt')
         cur_savepath = savepath + '{}/'.format(graphname)
