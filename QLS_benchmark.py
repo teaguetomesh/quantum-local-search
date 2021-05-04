@@ -80,7 +80,7 @@ def main():
             rep_range = range(1, args.reps+1)
 
         for rep in rep_range:
-            print('\n','%'*10, 'Start of Rep', rep+1, '%'*10,'\n')
+            print('\n','%'*10, 'Start of Rep', rep, '%'*10,'\n')
             out = solve_mis.quantum_local_search(init_state, G, args.npm,
                                                  args.mnd, verbose=args.v,
                                                  threads=args.threads,
