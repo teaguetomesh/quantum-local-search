@@ -11,7 +11,7 @@ from networkx.generators.ego import ego_graph
 from scipy.optimize import minimize
 
 import qiskit
-from qiskit import *
+from qiskit import Aer
 from qiskit.quantum_info import Statevector
 
 from utils.graph_funcs import *
@@ -152,9 +152,9 @@ def quantum_local_search(init_state, G, num_partial_mixers, max_node_dist,
 
             hot_nodes = list(np.random.permutation(hot_nodes))
 
-        #print('\tOptimal Parameters:', opt_params)
-        print('\tOptimal cost:', opt_cost)
-        print('\tOptimal hot nodes:', best_hot_nodes)
+        if verbose:
+            print('\tOptimal cost:', opt_cost)
+            print('\tOptimal hot nodes:', best_hot_nodes)
 
         # Get the results of the optimized circuit
         opt_circ = gen_qlsa(induced_G, cur_mis_state, best_hot_nodes,
@@ -200,3 +200,74 @@ def quantum_local_search(init_state, G, num_partial_mixers, max_node_dist,
         iteration += 1
 
     return cur_mis_state, history
+
+
+def classical_local_search(init_state, G, max_node_dist, verbose=0, threads=0):
+    """
+    Find the MIS of G using Classical Local Search (CLS).
+    At every round of the algorithm, a subset of G's nodes are selected and the
+    Boppana-Halldorsson algorithm is used to find an independent set on the subset.
+    """
+    # Stopping condition is reached when all nodes are either flipped on or
+    # have a neighbor which is flipped on
+    num_nodes = len(G.nodes)
+    stopping_condition = [0 for _ in range(num_nodes)]
+
+    # Continue until stopping condition is reached
+    cur_mis_state = init_state
+    history = []
+    iteration = 1
+    while sum(stopping_condition) < len(G.nodes):
+        # Select a new initial node
+        init_node = np.random.choice([node for node, val in enumerate(stopping_condition) if val == 0])
+        if verbose:
+            print('-'*10, 'Iteration:', iteration, '-'*10)
+            print('Stopping condition:', stopping_condition)
+            print('Selected node:', init_node)
+            print('Current mis state:', cur_mis_state)
+
+        # Get the neighborhood induced by the init_node and all neighbors up to
+        # distance max_node_dist edges away
+        induced_G = ego_graph(G, init_node, radius=max_node_dist, center=True)
+
+        # Evaluate the Boppana-Halldorsson algorithm on the induced subgraph
+        induced_G_mis = nx.algorithms.approximation.maximum_independent_set(induced_G)
+
+        # Check to ensure a valid independent set is maintained on the full graph
+        valid_indset = []
+        for node in induced_G_mis:
+            valid = True
+            for neighbor in G[node]:
+                if cur_mis_state[neighbor] == '1':
+                    # This node was flipped when its neighbor was already
+                    # in the independent set. Turn this node off.
+                    valid = False
+                    break
+            if valid:
+                valid_indset.append(node)
+
+        # Update the current initial state with the result of the local search
+        prev_mis_state = cur_mis_state
+        if verbose:
+            print('\tPrevious mis:', prev_mis_state)
+        temp_mis_state = list(cur_mis_state)
+        for node in valid_indset:
+            temp_mis_state[node] = '1'
+        cur_mis_state = ''.join(temp_mis_state)
+
+        if verbose:
+            print('\tUpdated mis: ', cur_mis_state)
+            print()
+
+        # Save results to the history
+        history.append((init_node, prev_mis_state, induced_G, cur_mis_state))
+
+        # Update the stopping condition by turning all bits to 1 if they were included
+        # in the BH evaluation
+        for node in induced_G.nodes:
+            stopping_condition[node] = 1
+
+        iteration += 1
+
+    return cur_mis_state, history
+

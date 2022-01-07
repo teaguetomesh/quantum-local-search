@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Solve the MIS problem on different benchmark graphs using QLS
 """
@@ -5,6 +6,7 @@ import os, sys, argparse, glob
 import numpy as np
 import solve_mis
 import pickle, random
+from pathlib import Path
 from utils.graph_funcs import graph_from_file, is_indset
 
 def parse_args():
@@ -29,6 +31,10 @@ def parse_args():
                         help='Number of parallel threads passed to Aer')
     parser.add_argument('--hnp', type=int, default=3,
                         help='Number of hot node permutations to try within each local neighborhood')
+    parser.add_argument('--quantum', type=int, default=1,
+                        help='Use a quantum solver (1) or a classical solver (0)')
+    parser.add_argument('--tag', type=str, default=None,
+                        help='A tag to be added to the final savename for help with debugging.')
     args = parser.parse_args()
     return args
 
@@ -44,13 +50,11 @@ def main():
     all_graphs = glob.glob(QLSROOT + args.graph)
     graph_type = all_graphs[0].split('/')[-2]
 
-    savepath = QLSROOT+'benchmark_results/QLS_{}/'.format(graph_type)
-    if not os.path.isdir(savepath):
-        os.mkdir(savepath)
-
-    savepath += 'NPM_{}/'.format(args.npm)
-    if not os.path.isdir(savepath):
-        os.mkdir(savepath)
+    if args.quantum:
+        savepath = f'{QLSROOT}benchmark_results/QLS_{graph_type}/NS{args.mnd}_NPM{args.npm}/'
+    else:
+        savepath = f'{QLSROOT}benchmark_results/CLS_{graph_type}/NS{args.mnd}/'
+    Path(savepath).mkdir(parents=True, exist_ok=True)
 
     for graphfn in all_graphs:
         graphname = graphfn.split('/')[-1].strip('.txt')
@@ -81,13 +85,22 @@ def main():
 
         for rep in rep_range:
             print('\n','%'*10, 'Start of Rep', rep, '%'*10,'\n')
-            out = solve_mis.quantum_local_search(init_state, G, args.npm,
-                                                 args.mnd, verbose=args.v,
-                                                 threads=args.threads,
-                                                 hot_node_permutations=args.hnp)
+            if args.quantum:
+                out = solve_mis.quantum_local_search(init_state, G, args.npm,
+                        args.mnd, verbose=args.v, threads=args.threads,
+                        hot_node_permutations=args.hnp)
+            else:
+                out = solve_mis.classical_local_search(init_state, G, args.mnd,
+                        verbose=args.v)
 
             # Save the results
-            savename = '{}_QLS_rep{}.pickle'.format(graphname, rep)
+            if args.quantum:
+                savename = f'{graphname}_QLS_rep{rep}.pickle'
+            else:
+                savename = f'{graphname}_CLS_rep{rep}.pickle'
+
+            if args.tag:
+                savename = f'{args.tag}_{savename}'
 
             with open(cur_savepath+savename, 'ab') as pf:
                 pickle.dump({'graph':graphfn, 'out':out}, pf)
