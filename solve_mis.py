@@ -121,10 +121,16 @@ def quantum_local_search(init_state, G, num_partial_mixers, max_node_dist,
             # increase the radius of the induced graph
             k += 1
 
+        # Collect the nodes which will be involved in the optimization
+        participants = [n for n in hot_nodes]
+        for node in hot_nodes:
+            participants.extend(list(induced_G[node]))
+        participants = list(set(participants))
+
         # Variationally optimize the ansatz
         num_params = len(hot_nodes) + 1
-        num_qubits = len(induced_G.nodes)
-        nodes = list(induced_G.nodes)
+        num_qubits = len(participants)
+        nodes = participants
         qubits_to_nodes = {q : nodes[q] for q in range(num_qubits)}
         nodes_to_qubits = {qubits_to_nodes[q] : q for q in qubits_to_nodes.keys()}
         if verbose:

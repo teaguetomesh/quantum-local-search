@@ -16,7 +16,7 @@ from utils.helper_funcs import *
 def gen_qlsa(circuit_G, init_state, hot_nodes, params, qubits_to_nodes, nodes_to_qubits,
              barriers=1, decompose_level=1, verbose=0):
 
-    nq = len(circuit_G.nodes)
+    nq = len(qubits_to_nodes.keys())
 
     # Circuit construction
     circ = qk.QuantumCircuit(nq, name='q')
@@ -64,10 +64,10 @@ def gen_qlsa(circuit_G, init_state, hot_nodes, params, qubits_to_nodes, nodes_to
             circ.mcx(ctrl_qubits, circ.ancillas[0])
             for ctrl in ctrl_qubits:
                 circ.x(ctrl)
-                
+
             # The new AerSimulator is unable to simulate crx gates, so use a CU gate instead
             circ.cu3(2*alpha, -np.pi/2, np.pi/2, circ.ancillas[0], circ.qubits[qubit])
-        
+
             # Uncompute the parity
             for ctrl in ctrl_qubits:
                 circ.x(ctrl)
