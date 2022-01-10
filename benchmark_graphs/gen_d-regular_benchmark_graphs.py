@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import glob
 import networkx as nx
 
@@ -25,8 +26,8 @@ for folder in dirs:
     d = int(folder.split('_')[1][1:])
     print('Nodes: {}, degree: {}'.format(n, d))
 
-    count = 0
-    while count < 20:
+    count = 20
+    while count < 40:
         G = nx.random_regular_graph(d, n)
         if nx.is_connected(G): #and is_unique(folder, G):
             count += 1
