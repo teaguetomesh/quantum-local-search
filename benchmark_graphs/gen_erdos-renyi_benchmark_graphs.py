@@ -1,40 +1,45 @@
+#!/usr/bin/env python
+"""
+Generate random Erdos-Renyi graphs.
+
+Based on the description in Farhi, Gamarnik, Gutman 2020 (https://arxiv.org/abs/2004.09002)
+"""
+import os
 import glob
 import networkx as nx
-
-import sys
-sys.path.append('../')
-
-from utils.graph_funcs import graph_from_file
+import numpy as np
 
 
-def is_unique(folder, G):
-    all_graphs = glob.glob(folder+'/*')
+average_degree = 3
+n_vals = [20, 60, 100]
 
-    for graph in all_graphs:
-        cur_G = graph_from_file(graph)
-        if nx.is_isomorphic(G, cur_G):
-            return False
+for n in n_vals:
+    m = int(average_degree * n / 2)
+    print(f'Generating (fixed edge count) Erdos Renyi graphs with {n} nodes and {m} edges')
 
-    return True
+    folder = f'N{n}_er{average_degree}_graphs/'
+    if not os.path.isdir(folder):
+        os.mkdir(folder)
 
-dirs = glob.glob('N*_p10_graphs')
+    count = 1
+    while count <= 40:
+        all_possible_edges = []
+        for i in range(n-1):
+            for j in range(i+1, n):
+                all_possible_edges.append((i,j))
 
-for folder in dirs:
-    print(folder)
-    n = int(folder.split('_')[0][1:])
-    p = int(folder.split('_')[1][1:]) / 100
-    print('Nodes: {}, probability: {}'.format(n, p))
+        np.random.shuffle(all_possible_edges)
 
-    count = 0
-    while count < 20:
-        G = nx.generators.random_graphs.erdos_renyi_graph(n, p)
-        if nx.is_connected(G): #and is_unique(folder, G):
-            count += 1
+        G = nx.Graph()
+        G.add_edges_from(all_possible_edges[:m])
+
+        if nx.is_connected(G):
             edges = list(G.edges())
 
             with open(folder+'/G{}.txt'.format(count), 'w') as fn:
-                edgestr = ''.join(['{}, '.format(e) for e in edges])
+                edgestr = ''.join([f'{e}, ' for e in edges])
                 edgestr = edgestr.strip(', ')
                 fn.write(edgestr)
 
-
+            count += 1
+print('DONE')
