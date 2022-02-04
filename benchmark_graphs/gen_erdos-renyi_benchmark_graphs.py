@@ -33,7 +33,7 @@ for n in n_vals:
         G = nx.Graph()
         G.add_edges_from(all_possible_edges[:m])
 
-        if nx.is_connected(G):
+        if nx.is_connected(G) and len(G.nodes) == n:
             edges = list(G.edges())
 
             with open(folder+'/G{}.txt'.format(count), 'w') as fn:
