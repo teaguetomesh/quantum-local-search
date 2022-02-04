@@ -130,8 +130,7 @@ def quantum_local_search(init_state, G, num_partial_mixers, max_node_dist,
         # Variationally optimize the ansatz
         num_params = len(hot_nodes) + 1
         num_qubits = len(participants)
-        nodes = participants
-        qubits_to_nodes = {q : nodes[q] for q in range(num_qubits)}
+        qubits_to_nodes = {q : participants[q] for q in range(num_qubits)}
         nodes_to_qubits = {qubits_to_nodes[q] : q for q in qubits_to_nodes.keys()}
         if verbose:
             print('\tCurrent Hot Nodes:', hot_nodes)
