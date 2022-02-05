@@ -13,26 +13,17 @@ def random_independent_set(G):
 
     independent_set = []
 
-    print('Edges:', G.edges)
-
     while sum(stopping_condition) < n:
         unvisited_nodes = [i for i, bit in enumerate(stopping_condition) if bit == 0]
 
         next_node = np.random.choice(unvisited_nodes)
         stopping_condition[next_node] = 1
 
-        print(stopping_condition, unvisited_nodes, next_node)
-        print([(neighbor, neighbor in independent_set) for neighbor in G.neighbors(next_node)])
-
         if not any([neighbor in independent_set for neighbor in G.neighbors(next_node)]):
             independent_set.append(next_node)
 
-        print('IS after check:', independent_set)
-
-    print('Final IS:', independent_set)
     mis_bitstr = ''.join(['1' if n in independent_set else '0' for n in sorted(list(G.nodes))])
-    print(mis_bitstr)
-    if qcopt.graph_funcs.is_indset(mis_bitstr, G):
+    if not qcopt.graph_funcs.is_indset(mis_bitstr, G, little_endian=False):
         raise Exception('Produced an invalid independent set!')
 
     return len(independent_set)
@@ -49,6 +40,6 @@ for graph_type in all_graph_types:
         rand_mis = []
         for _ in range(5):
             rand_mis.append(random_independent_set(G))
-        print(f'{"/".join(graph.split("/")[-2:])} best random mis size: {np.max(rand_mis)}')
+        print(f'{"/".join(graph.split("/")[-2:])} avg random mis size: {np.mean(rand_mis)}')
         with open(f'{savepath}/{graph.split("/")[-1].strip(".txt")}_rand_results.txt', 'w') as fn:
-            fn.write(f'Best random mis size over 5 repetitions: {np.max(rand_mis)}')
+            fn.write(f'Average random mis size over 5 repetitions: {np.mean(rand_mis)}')
