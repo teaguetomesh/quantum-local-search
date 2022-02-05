@@ -149,10 +149,12 @@ def quantum_local_search(init_state, G, num_partial_mixers, max_node_dist,
 
             temp_params = out['x']
             temp_cost = out['fun']
+            temp_nfev = out['nfev']
 
             if temp_cost < opt_cost:
                 opt_cost = temp_cost
                 opt_params = temp_params
+                opt_nfev = temp_nfev
                 best_hot_nodes = copy.copy(hot_nodes)
 
             hot_nodes = list(np.random.permutation(hot_nodes))
@@ -193,7 +195,7 @@ def quantum_local_search(init_state, G, num_partial_mixers, max_node_dist,
         # Save results to the history
         history.append((init_node, prev_mis_state, induced_G, opt_cost,
                         opt_params, best_hot_nodes, qubits_to_nodes,
-                        nodes_to_qubits, cur_mis_state))
+                        nodes_to_qubits, cur_mis_state, opt_nfev))
 
         # Update the stopping condition by turning all bits to 1 if they OR a
         # neighbor were switched on
