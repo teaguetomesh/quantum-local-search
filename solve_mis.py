@@ -237,7 +237,7 @@ def classical_local_search(init_state, G, max_node_dist, verbose=0, threads=0):
 
         # Evaluate the Boppana-Halldorsson algorithm on the induced subgraph
         initial_iset = [node for node, bit in enumerate(cur_mis_state) if bit == '1' and node in induced_G.nodes]
-        induced_G_mis = boppana_halldorsson.boppana_halldorsson(induced_G, iset=inital_iset)
+        induced_G_mis = boppana_halldorsson.boppana_halldorsson(induced_G, iset=initial_iset)
 
         # Check to ensure a valid independent set is maintained on the full graph
         valid_nodes = []
@@ -253,7 +253,7 @@ def classical_local_search(init_state, G, max_node_dist, verbose=0, threads=0):
                 valid_nodes.append(node)
 
         # Update the current initial state with the result of the local search
-        prev_mis_state = cur_mis_state.copy()
+        prev_mis_state = cur_mis_state
         if verbose:
             print('\tPrevious mis:', prev_mis_state)
         temp_mis_state = list(cur_mis_state)
