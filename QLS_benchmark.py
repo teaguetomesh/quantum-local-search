@@ -7,7 +7,8 @@ import numpy as np
 import solve_mis
 import pickle, random
 from pathlib import Path
-from utils.graph_funcs import graph_from_file, is_indset
+
+import qcopt
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -62,7 +63,7 @@ def main():
         if not os.path.isdir(cur_savepath):
             os.mkdir(cur_savepath)
 
-        G = graph_from_file(graphfn)
+        G = qcopt.graph_funcs.graph_from_file(graphfn)
         print('\nNew graph:', graphname)
         print(G.edges())
         nq = len(G.nodes)
@@ -92,6 +93,8 @@ def main():
             else:
                 out = solve_mis.classical_local_search(init_state, G, args.mnd,
                         verbose=args.v)
+                if not qcopt.graph_funcs.is_indset(out[0], G, little_endian=False):
+                    raise Exception('CLS produced an invalid MIS!')
 
             # Save the results
             if args.quantum:

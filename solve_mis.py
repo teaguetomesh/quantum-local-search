@@ -212,8 +212,8 @@ def quantum_local_search(init_state, G, num_partial_mixers, max_node_dist,
 def classical_local_search(init_state, G, max_node_dist, verbose=0, threads=0):
     """
     Find the MIS of G using Classical Local Search (CLS).
-    At every round of the algorithm, a subset of G's nodes are selected and the
-    Boppana-Halldorsson algorithm is used to find an independent set on the subset.
+    At every round of the algorithm, a subset of G's nodes (a neighborhood) are selected
+    and the Boppana-Halldorsson algorithm is used to find an independent set on the subset.
     """
     # Stopping condition is reached when all nodes are either flipped on or
     # have a neighbor which is flipped on

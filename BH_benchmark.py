@@ -6,7 +6,7 @@ import numpy as np
 
 import qcopt
 
-all_graph_types = glob.glob('benchmark_graphs/N*graphs')
+all_graph_types = glob.glob('benchmark_graphs/N*er3_graphs')
 
 for graph_type in all_graph_types:
     all_graphs = glob.glob(f'{graph_type}/G*.txt')
