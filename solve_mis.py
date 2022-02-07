@@ -14,9 +14,7 @@ import qiskit
 from qiskit import Aer
 from qiskit.quantum_info import Statevector
 
-from utils.graph_funcs import *
-from utils.helper_funcs import *
-
+import boppana_halldorsson
 from qls_ansatz import gen_qlsa
 
 
@@ -238,10 +236,11 @@ def classical_local_search(init_state, G, max_node_dist, verbose=0, threads=0):
         induced_G = ego_graph(G, init_node, radius=max_node_dist, center=True)
 
         # Evaluate the Boppana-Halldorsson algorithm on the induced subgraph
-        induced_G_mis = nx.algorithms.approximation.maximum_independent_set(induced_G)
+        initial_iset = [node for node, bit in enumerate(cur_mis_state) if bit == '1' and node in induced_G.nodes]
+        induced_G_mis = boppana_halldorsson.boppana_halldorsson(induced_G, iset=inital_iset)
 
         # Check to ensure a valid independent set is maintained on the full graph
-        valid_indset = []
+        valid_nodes = []
         for node in induced_G_mis:
             valid = True
             for neighbor in G[node]:
@@ -251,14 +250,14 @@ def classical_local_search(init_state, G, max_node_dist, verbose=0, threads=0):
                     valid = False
                     break
             if valid:
-                valid_indset.append(node)
+                valid_nodes.append(node)
 
         # Update the current initial state with the result of the local search
-        prev_mis_state = cur_mis_state
+        prev_mis_state = cur_mis_state.copy()
         if verbose:
             print('\tPrevious mis:', prev_mis_state)
         temp_mis_state = list(cur_mis_state)
-        for node in valid_indset:
+        for node in valid_nodes:
             temp_mis_state[node] = '1'
         cur_mis_state = ''.join(temp_mis_state)
 
