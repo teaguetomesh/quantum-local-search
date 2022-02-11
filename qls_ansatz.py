@@ -7,7 +7,7 @@ Local Search Ansatz (QLSA)
 import numpy as np
 import qiskit as qk
 from qiskit.circuit import ControlledGate
-from qiskit.circuit.library.standard_gates import XGate
+from qiskit.circuit.library.standard_gates import RXGate
 from qiskit.transpiler.passes import Unroller
 from qiskit.transpiler import PassManager
 
@@ -73,17 +73,15 @@ def gen_qlsa(circuit_G, init_state, hot_nodes, params, qubits_to_nodes, nodes_to
             for ctrl in ctrl_qubits:
                 circ.x(ctrl)
         else:
-            # Define a custom multi-controlled Toffoli
-            mc_toffoli = ControlledGate('mc_toffoli', len(neighbors)+1, [], num_ctrl_qubits=len(neighbors),
-                                        ctrl_state='0'*len(neighbors), base_gate=XGate())
-
-            # Compute parity
-            circ.append(mc_toffoli, ctrl_qubits + [circ.ancillas[0]])
-            # Controlled Rotation
-            circ.crx(2*alpha, circ.ancillas[0], circ.qubits[qubit])
-            # Uncompute parity
-            circ.append(mc_toffoli, ctrl_qubits + [circ.ancillas[0]])
-
+            mcrx = ControlledGate(
+                "mcrx",
+                len(neighbors) + 1,
+                [2 * alpha],
+                num_ctrl_qubits=len(neighbors),
+                ctrl_state="0" * len(neighbors),
+                base_gate=RXGate(2 * alpha),
+            )
+            circ.append(mcrx, ctrl_qubits + [circ.qubits[qubit]])
 
         if barriers > 1:
             circ.barrier()
