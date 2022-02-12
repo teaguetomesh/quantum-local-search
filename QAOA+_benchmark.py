@@ -37,7 +37,7 @@ def main():
     all_graphs = glob.glob(ROOT + args.graph)
     graph_type = all_graphs[0].split("/")[-2]
 
-    savepath = ROOT + f"benchmark_results/QAOA+_P{args.P}_qasm/{graph_type}/"
+    savepath = ROOT + f"benchmark_results/QAOA+_P{args.P}_qasm/Lambda_{args.lamda}/{graph_type}/"
     Path(savepath).mkdir(parents=True, exist_ok=True)
 
     for graphfn in all_graphs:
