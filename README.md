@@ -30,4 +30,4 @@ The file `QLS_benchmark.py` can be used to perform additional simulations of the
 If you use this code, please cite our work:
 
 
-    Teague Tomesh, Zain H. Saleem, and Martin Suchara. "Quantum Local Search with the Quantum Alternating Operator Ansatz." *Quantum* 6 (2022): 781.
+    Teague Tomesh, Zain H. Saleem, and Martin Suchara. "Quantum Local Search with the Quantum Alternating Operator Ansatz." Quantum 6 (2022): 781.
